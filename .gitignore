@@ -1,0 +1,19 @@
+# Environment / secrets
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+venv/
+.venv/
+env/
+
+# Runtime-generated (recreated automatically when the app runs)
+uploads/*
+plots/*.png
+reports/*.md
+reports/*.pdf
+
+# OS / editor cruft
+.DS_Store
