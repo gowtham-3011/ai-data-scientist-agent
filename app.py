@@ -24,14 +24,14 @@ AGENT_ICONS = {
     "cleaner": "🧹",
     "visualizer": "📊",
     "statistician": "📈",
-    "explainer": "🗣️",   # <-- NEW ICON
+    "explainer": "🗣️",
     "reporter": "📝",
 }
 
 st.title("🤖 End-to-End AI Data Scientist Agent")
 st.caption(
     "A LangGraph multi-agent system: Supervisor → Inspector → Cleaner → "
-    "Visualizer → Statistician → Reporter"
+    "Visualizer → Statistician → Explainer → Reporter"
 )
 
 # ============================================================

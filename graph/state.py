@@ -23,6 +23,7 @@ class AgentState(TypedDict, total=False):
     # --- Cleaner output ---
     cleaning_code: str                  # last generated pandas code
     cleaning_error: Optional[str]       # last exception (None if success)
+    cleaning_method: str                # "llm" | "fallback" | "fallback_no_key" -- what actually cleaned df
     clean_attempts: int
     max_clean_attempts: int
     cleaned: bool
@@ -44,9 +45,9 @@ class AgentState(TypedDict, total=False):
     # --- bookkeeping / observability ---
     errors: List[str]                    # running list of all errors seen
     messages: List[str]                  # human-readable log, shown in Streamlit
-    current_node: str      
+    current_node: str                    # last node the Supervisor dispatched to
 
-                  # last node the Supervisor dispatched to
+    # --- Explainer output ---
     executive_summary: str
     explained: bool
 
@@ -60,6 +61,7 @@ def make_initial_state(file_path: str, max_clean_attempts: int = 3) -> AgentStat
         inspected=False,
         cleaning_code="",
         cleaning_error=None,
+        cleaning_method="",
         clean_attempts=0,
         max_clean_attempts=max_clean_attempts,
         cleaned=False,
@@ -67,6 +69,8 @@ def make_initial_state(file_path: str, max_clean_attempts: int = 3) -> AgentStat
         visualized=False,
         stats={},
         analyzed=False,
+        executive_summary="",
+        explained=False,
         report_md="",
         report_path="",
         pdf_path=None,

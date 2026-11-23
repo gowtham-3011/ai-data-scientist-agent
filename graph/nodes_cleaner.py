@@ -68,8 +68,9 @@ def cleaner_node(state: AgentState) -> AgentState:
         state["df"] = _fallback_clean(df)
         state["cleaned"] = True
         state["cleaning_error"] = None
+        state["cleaning_method"] = "fallback_no_key"
         state.setdefault("messages", []).append(
-            "🧹 Cleaner: no ANTHROPIC_API_KEY configured -> used deterministic "
+            "🧹 Cleaner: no LLM API key configured -> used deterministic "
             "rule-based cleaning (median/mode fill + date parse + dedupe) instead "
             "of LLM-generated code."
         )
@@ -107,6 +108,7 @@ def cleaner_node(state: AgentState) -> AgentState:
             state["df"] = _fallback_clean(df)
             state["cleaned"] = True
             state["cleaning_error"] = None
+            state["cleaning_method"] = "fallback"
             state.setdefault("messages", []).append(
                 f"🧹 Cleaner: LLM call failed {attempt} times -> applied deterministic "
                 f"fallback cleaning."
@@ -127,6 +129,7 @@ def cleaner_node(state: AgentState) -> AgentState:
         state["df"] = local_env["df"]
         state["cleaning_error"] = None
         state["cleaned"] = True
+        state["cleaning_method"] = "llm"
         state.setdefault("messages", []).append(
             f"🧹 Cleaner: LLM-generated cleaning code succeeded on attempt {attempt}."
         )
@@ -139,6 +142,7 @@ def cleaner_node(state: AgentState) -> AgentState:
             state["df"] = _fallback_clean(df)
             state["cleaned"] = True
             state["cleaning_error"] = None
+            state["cleaning_method"] = "fallback"
             state.setdefault("messages", []).append(
                 f"🧹 Cleaner: LLM code failed {attempt} times -> applied deterministic "
                 f"fallback cleaning (median/mode fill + date parse + dedupe)."

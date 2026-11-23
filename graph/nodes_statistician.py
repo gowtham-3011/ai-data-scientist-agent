@@ -22,10 +22,18 @@ def statistician_node(state: AgentState) -> AgentState:
     numeric_df, _categorical_df = split_numeric_categorical(df)
 
     stats = {}
-    stats["describe"] = numeric_df.describe().to_dict()
     stats["shape"] = df.shape
+    stats["numeric_columns"] = numeric_df.columns.tolist()
+    has_numeric = numeric_df.shape[1] > 0
 
-    corr_matrix = numeric_df.corr(numeric_only=True)
+    # numeric_df.describe() raises on a frame with zero columns (e.g. an all-text CSV),
+    # so only compute numeric statistics when there is something to compute.
+    if has_numeric:
+        stats["describe"] = numeric_df.describe().to_dict()
+        corr_matrix = numeric_df.corr(numeric_only=True)
+    else:
+        stats["describe"] = {}
+        corr_matrix = pd.DataFrame()
     stats["correlation_matrix"] = corr_matrix.round(4).to_dict()
 
     # Find the single strongest (non-self) correlation pair
@@ -43,13 +51,18 @@ def statistician_node(state: AgentState) -> AgentState:
         "value": round(float(top_val), 4) if top_pair else None,
     }
 
-    stats["skew"] = numeric_df.skew(numeric_only=True).round(4).to_dict()
-    stats["kurtosis"] = numeric_df.kurtosis(numeric_only=True).round(4).to_dict()
+    stats["skew"] = numeric_df.skew(numeric_only=True).round(4).to_dict() if has_numeric else {}
+    stats["kurtosis"] = numeric_df.kurtosis(numeric_only=True).round(4).to_dict() if has_numeric else {}
 
     state["stats"] = stats
 
     # Narrative summary -- LLM narrates, but every number came from `stats` above.
-    if not llm_available():
+    if not has_numeric:
+        stats["narrative"] = (
+            "_No numeric columns were found, so no statistical analysis could be "
+            "computed for this dataset._"
+        )
+    elif not llm_available():
         stats["narrative"] = (
             "_No LLM API key configured (or key invalid) -- narrative generation skipped. "
             "All statistics above were computed directly with pandas/numpy._"

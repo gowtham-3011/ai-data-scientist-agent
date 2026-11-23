@@ -13,6 +13,13 @@ from graph.state import AgentState
 
 REPORTS_DIR = "reports"
 
+# Set by the Cleaner (state["cleaning_method"]) -- reflects what actually cleaned the data.
+_CLEANING_METHOD_LABELS = {
+    "llm": "- Cleaning method: LLM-generated pandas code",
+    "fallback": "- Cleaning method: deterministic fallback (LLM code/call failed repeatedly)",
+    "fallback_no_key": "- Cleaning method: deterministic rule-based cleaning (no LLM API key configured)",
+}
+
 
 def _df_head_markdown(df: pd.DataFrame, n: int = 5) -> str:
     try:
@@ -57,10 +64,8 @@ def reporter_node(state: AgentState) -> AgentState:
         f"- Original shape: {state.get('original_shape')}",
         f"- Final shape after cleaning: {df.shape}",
         f"- Cleaning attempts: {state.get('clean_attempts', 0)}",
-        (
-            "- Cleaning method: LLM-generated pandas code"
-            if not state.get("cleaning_error")
-            else "- Cleaning method: deterministic fallback (LLM code failed repeatedly)"
+        _CLEANING_METHOD_LABELS.get(
+            state.get("cleaning_method", ""), "- Cleaning method: unknown"
         ),
         "",
         "### Cleaned data preview",
